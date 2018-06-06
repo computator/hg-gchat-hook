@@ -1,9 +1,8 @@
 from mercurial import cmdutil
 try:
 	from mercurial import color
-	usecolor = True
 except ImportError:
-	usecolor = False
+	pass
 import urllib2
 import json
 
@@ -15,10 +14,12 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 	tpl = ui.config('gchat', 'notify_template', "{count} changesets {action}ed from repository _{url}_:\n\n{log}\n")
 	log_tpl = ui.config('gchat', 'notify_log_template', 'status')
 
-	orig_color = ui.config('ui', 'color')
-	ui.setconfig('ui', 'color', 'off')
-	if usecolor:
+	try:
+		orig_color = ui.config('ui', 'color')
+		ui.setconfig('ui', 'color', 'off')
 		color.setup(ui)
+	except ImportError:
+		pass
 
 	revs = repo.revs('{}:{}'.format(node_last, node))
 	disp = cmdutil.show_changeset(ui, repo, {'template': log_tpl})
@@ -33,9 +34,11 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 		logtext += newtext
 	disp.close()
 
-	ui.setconfig('ui', 'color', orig_color)
-	if usecolor:
+	try:
+		ui.setconfig('ui', 'color', orig_color)
 		color.setup(ui)
+	except ImportError:
+		pass
 
 	args = {
 		'count': len(revs),
