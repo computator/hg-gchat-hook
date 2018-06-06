@@ -1,4 +1,9 @@
-from mercurial import cmdutil, color
+from mercurial import cmdutil
+try:
+	from mercurial import color
+	usecolor = True
+except ImportError:
+	usecolor = False
 import urllib2
 import json
 
@@ -12,7 +17,8 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 
 	orig_color = ui.config('ui', 'color')
 	ui.setconfig('ui', 'color', 'off')
-	color.setup(ui)
+	if usecolor:
+		color.setup(ui)
 
 	revs = repo.revs('{}:{}'.format(node_last, node))
 	disp = cmdutil.show_changeset(ui, repo, {'template': log_tpl})
@@ -28,7 +34,8 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 	disp.close()
 
 	ui.setconfig('ui', 'color', orig_color)
-	color.setup(ui)
+	if usecolor:
+		color.setup(ui)
 
 	args = {
 		'count': len(revs),
