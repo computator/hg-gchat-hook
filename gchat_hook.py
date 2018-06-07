@@ -11,7 +11,7 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 	if not notify_url:
 		ui.warn("Skipping push_notify hook because notify_url is not set for gchat\n")
 		return True
-	tpl = ui.config('gchat', 'notify_template', "{count} changesets {action}ed from repository _{url}_:\n\n{log}\n")
+	tpl = ui.config('gchat', 'notify_template', "{count} changesets {action} from repository _{url}_:\n\n{log}\n")
 	log_tpl = ui.config('gchat', 'notify_log_template', 'status')
 
 	try:
@@ -42,7 +42,8 @@ def push_notify(ui, repo, node, node_last, url, **kwargs):
 
 	args = {
 		'count': len(revs),
-		'action': kwargs['source'],
+		'action': 'pushed' if kwargs['source'] == 'serve' else kwargs['source'].rstrip('e') + 'ed',
+		'source': kwargs['source'],
 		'url': url,
 		'log': logtext
 	}
